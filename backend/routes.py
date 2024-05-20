@@ -103,11 +103,7 @@ def get_response(chat_id):
         messages = client.beta.threads.messages.list(thread_id=thread)
         resposta =  messages.data[0].content[0].text.value
         print(resposta)
-        if "FUNCOES NECESSARIAS121:" in resposta.upper() and "SQL121" in resposta.upper():
-            user_message = processar_mensagem(resposta)
-        elif "FUNCOES NECESSARIAS121:" in resposta.upper():
-            user_message = processar_funcoes(resposta)
-        elif "SQL121:" in resposta.upper():
+        if "SQL121:" in resposta.upper():
             user_message = processar_sql(resposta)
     # Salvando a mensagem do usuário e a resposta do servidor no banco de dados
     cur = mysql.connection.cursor()

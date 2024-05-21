@@ -1,9 +1,12 @@
 from flask import Blueprint, request, jsonify, render_template
 from flask_login import login_user, login_required, logout_user, current_user
+from backend.file import *
 from backend.db import mysql
 from backend.gpt import client
 from backend.user import User
 from backend.funcoes import *
+import os
+
 login_routes = Blueprint('login_routes', __name__)
 index_routes = Blueprint('index_routes', __name__)
 cadastrar_routes = Blueprint('cadastrar_routes', __name__)
@@ -87,8 +90,7 @@ def get_response(chat_id):
     data = request.get_json()
     user_message = data.get('message')
     mensagem_usuario = user_message
-    resposta = "FUNCOES NECESSARIAS121"
-    while "FUNCOES NECESSARIAS121" in resposta or "SQL121" in resposta:
+    while True:
         message = client.beta.threads.messages.create(
         thread_id=thread,
         role="user",
@@ -102,9 +104,12 @@ def get_response(chat_id):
         )
         messages = client.beta.threads.messages.list(thread_id=thread)
         resposta =  messages.data[0].content[0].text.value
-        print(resposta)
         if "SQL121:" in resposta.upper():
             user_message = processar_sql(resposta)
+        elif "VECTOR121:" in resposta.upper():
+            user_message = procurar_similaridade(resposta)
+        else:
+            break
     # Salvando a mensagem do usuário e a resposta do servidor no banco de dados
     cur = mysql.connection.cursor()
     cur.execute("INSERT INTO messages (text_usuario, text_servidor, chat_id) VALUES (%s, %s, %s)", (mensagem_usuario, messages.data[0].content[0].text.value, chat_id))
@@ -190,3 +195,32 @@ def update_chat_title(chat_id):
         return jsonify({"message": "Título do chat atualizado com sucesso."}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@index_routes.route('/upload-arquivo', methods=['POST'])
+@login_required
+def upload_arquivo():
+    if 'file' not in request.files:
+        return 'Nenhum arquivo enviado.', 400
+
+    arquivo = request.files['file']
+
+    # Verifica se o usuário não selecionou nenhum arquivo
+    if arquivo.filename == '':
+        return 'Nenhum arquivo selecionado.', 400
+
+    # Verifica se o arquivo é permitido
+    if arquivo:
+        # Salvar o arquivo na pasta uploads
+        upload_folder = os.path.join("C:\\Users\\muril\\Documents\\Projetos Git\\IA-ChatBot\\backend", 'uploads')
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
+
+        file_path = os.path.join(upload_folder, arquivo.filename)
+        arquivo.save(file_path)
+        
+        # Criar e salvar o vectorstore
+        verificar_e_atualizar_indice(upload_folder)
+
+        return 'Arquivo enviado e vetorizado com sucesso.', 200
+    else:
+        return 'Tipo de arquivo não permitido.', 400

@@ -21,7 +21,7 @@ def processar_sql(mensagem):
         codigo_sql = codigo_sql.replace("CODIGO SQL121:", "").strip()
         codigo_sql = codigo_sql[codigo_sql.find("SELECT"):]
         cursor = mysql.connection.cursor()
-        cursor.execute(parte)
+        cursor.execute(codigo_sql)
         resultado = cursor.fetchall()
         cursor.close()
         resultado_final = '\n'.join([str(a) for a in resultado])

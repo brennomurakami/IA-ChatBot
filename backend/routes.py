@@ -91,20 +91,27 @@ def get_response(chat_id):
     user_message = data.get('message')
     mensagem_usuario = user_message
     while True:
+        print("ATÉ AQU2")
         message = client.beta.threads.messages.create(
         thread_id=thread,
         role="user",
         content=user_message
         )
-
+        print("ATÉ AQU3")
         run = client.beta.threads.runs.create_and_poll(
         thread_id=thread,
-        assistant_id="asst_8dZmPoQiKTMkaxUjMuS6uUuc",
-        max_completion_tokens=4000 # +/- 2000 palavras com 5 caracteres cada, para entrada e saida de dados
+        assistant_id="asst_8dZmPoQiKTMkaxUjMuS6uUuc"
         )
         messages = client.beta.threads.messages.list(thread_id=thread)
+        print("ATÉ AQU")
         resposta =  messages.data[0].content[0].text.value
-        if "SQL121:" in resposta.upper():
+        print("RESPOSTA INICIAL:", resposta)
+        if "SQL121:" in resposta.upper() and "VECTOR121:" in resposta.upper():
+            resposta.replace("VECTOR121:", "")
+            user_message = processar_sql(resposta)
+            resposta.replace("SQL121:", "")
+            user_message = procurar_similaridade(resposta+user_message)
+        elif "SQL121:" in resposta.upper():
             user_message = processar_sql(resposta)
         elif "VECTOR121:" in resposta.upper():
             user_message = procurar_similaridade(resposta)
@@ -211,7 +218,7 @@ def upload_arquivo():
     # Verifica se o arquivo é permitido
     if arquivo:
         # Salvar o arquivo na pasta uploads
-        upload_folder = os.path.join("C:\\Users\\muril\\Documents\\Projetos Git\\IA-ChatBot\\backend", 'uploads')
+        upload_folder = os.path.join("backend", 'uploads')
         if not os.path.exists(upload_folder):
             os.makedirs(upload_folder)
 
@@ -219,7 +226,7 @@ def upload_arquivo():
         arquivo.save(file_path)
         
         # Criar e salvar o vectorstore
-        verificar_e_atualizar_indice(upload_folder)
+        verificar_e_atualizar_indice(file_path)
 
         return 'Arquivo enviado e vetorizado com sucesso.', 200
     else:

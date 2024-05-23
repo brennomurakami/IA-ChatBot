@@ -46,7 +46,7 @@ def carregar_indices_faiss():
 def adicionar_texto_ao_indice(vector_store, files):
     texts = process_pdf(files)
     # Adiciona novos textos ao índice existente
-    metadatas = [{} for _ in texts]  # Cria uma lista de dicionários vazios
+    metadatas = [{} for _ in texts] 
     vector_store.add_texts(texts, metadatas=metadatas)
     # Salva o índice atualizado em um arquivo
     vector_store.save_local("faiss_index")

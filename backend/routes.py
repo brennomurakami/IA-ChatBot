@@ -197,6 +197,7 @@ def update_chat_title(chat_id):
 @index_routes.route('/upload-arquivo', methods=['POST'])
 @login_required
 def upload_arquivo():
+    
     if 'file' not in request.files:
         return 'Nenhum arquivo enviado.', 400
 
@@ -206,7 +207,6 @@ def upload_arquivo():
     if arquivo.filename == '':
         return 'Nenhum arquivo selecionado.', 400
 
-    # Verifica se o arquivo é permitido
     if arquivo:
         # Salvar o arquivo na pasta uploads
         upload_folder = os.path.join("backend", 'uploads')

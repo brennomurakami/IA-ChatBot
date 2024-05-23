@@ -91,30 +91,21 @@ def get_response(chat_id):
     user_message = data.get('message')
     mensagem_usuario = user_message
     while True:
-        print("ATÉ AQU2")
         message = client.beta.threads.messages.create(
         thread_id=thread,
         role="user",
         content=user_message
         )
-        print("ATÉ AQU3")
         run = client.beta.threads.runs.create_and_poll(
         thread_id=thread,
         assistant_id="asst_8dZmPoQiKTMkaxUjMuS6uUuc"
         )
         messages = client.beta.threads.messages.list(thread_id=thread)
-        print("ATÉ AQU")
         resposta =  messages.data[0].content[0].text.value
-        print("RESPOSTA INICIAL:", resposta)
-        if "SQL121:" in resposta.upper() and "VECTOR121:" in resposta.upper():
-            resposta.replace("VECTOR121:", "")
-            user_message = processar_sql(resposta)
-            resposta.replace("SQL121:", "")
-            user_message = procurar_similaridade(resposta+user_message)
-        elif "SQL121:" in resposta.upper():
+        if "SQL121:" in resposta.upper():
             user_message = processar_sql(resposta)
         elif "VECTOR121:" in resposta.upper():
-            user_message = procurar_similaridade(resposta)
+            user_message = procurar_similaridade(user_message)
         else:
             break
     # Salvando a mensagem do usuário e a resposta do servidor no banco de dados

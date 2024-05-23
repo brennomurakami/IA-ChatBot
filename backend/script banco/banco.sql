@@ -30,6 +30,7 @@ CREATE TABLE vacas (
     categoria VARCHAR(50),
     ECC FLOAT,
     ciclicidade INT,
+    peso DECIMAL(10,3),
     FOREIGN KEY (id_fazenda) REFERENCES fazendas(id)
 );
 
@@ -151,45 +152,45 @@ INSERT INTO fazendas (id_endereco, nome_fazenda) VALUES
 (16,  'Fazenda Boa Esperança');
 
 
-INSERT INTO vacas (id_fazenda, numero_animal, lote, vaca, categoria, ECC, ciclicidade) VALUES
-(1, 112349, 'LT01MRJ', 'Nelore', 'Multípara', 3, 0),
-(2, 178423, 'LT02EX', 'Angus', 'Multípara', 3.5, 1),
-(3, 333423, 'LT03BV', 'Guzerá', 'Nulípara', 3, 0),
-(4, 446753, 'LT04SJ', 'Gir Leiteiro', 'Multípara', 2.75, 1),
-(5, 559023, 'LT05SN', 'Simental', 'Primípara tardia', 4, 0),
-(6, 678431, 'LT06BE', 'Charolês', 'Multípara', 3.75, 1),
-(7, 700940, 'LT07SR', 'Brahman', 'Primípara precoce', 2.5, 1),
-(8, 809843, 'LT08PS', 'Angus', 'Multípara', 3.25, 1),
-(9, 994758, 'LT09SF', 'Hereford', 'Nulípara', 3.5, 1),
-(10, 109384, 'LT10BV', 'Bonsmara', 'Primípara precoce', 3, 1),
-(11, 119011, 'LT11PV', 'Girolando', 'Secundípara', 2.75, 1),
-(12, 149820, 'LT14EP', 'Holandesa', 'Primípara precoce', 3.25, 1),
-(13, 151423, 'LT15CA', 'Tabapuã', 'Primípara tardia', 3.5, 1),
-(14, 222333, 'LT16AA', 'Simental', 'Primípara tardia', 3.8, 0),
-(15, 333444, 'LT17BB', 'Brahman', 'Primípara precoce', 2.7, 1);
+INSERT INTO vacas (id_fazenda, numero_animal, lote, vaca, categoria, ECC, ciclicidade, peso) VALUES
+(1, 112349, 'LT01MRJ', 'Nelore', 'Multípara', 3, 0, 400),
+(2, 178423, 'LT02EX', 'Angus', 'Multípara', 3.5, 1, 600),
+(3, 333423, 'LT03BV', 'Guzerá', 'Nulípara', 3, 0, 550),
+(4, 446753, 'LT04SJ', 'Gir Leiteiro', 'Multípara', 2.75, 1, 500),
+(5, 559023, 'LT05SN', 'Simental', 'Primípara tardia', 4, 0, 550),
+(6, 678431, 'LT06BE', 'Charolês', 'Multípara', 3.75, 1, 600),
+(7, 700940, 'LT07SR', 'Brahman', 'Primípara precoce', 2.5, 1, 550),
+(8, 809843, 'LT08PS', 'Angus', 'Multípara', 3.25, 1, 600),
+(9, 994758, 'LT09SF', 'Hereford', 'Nulípara', 3.5, 1, 600),
+(10, 109384, 'LT10BV', 'Bonsmara', 'Primípara precoce', 3, 1, 500),
+(11, 119011, 'LT11PV', 'Girolando', 'Secundípara', 2.75, 1, 550),
+(12, 149820, 'LT14EP', 'Holandesa', 'Primípara precoce', 3.25, 1, 600),
+(13, 151423, 'LT15CA', 'Tabapuã', 'Primípara tardia', 3.5, 1, 500),
+(14, 222333, 'LT16AA', 'Simental', 'Primípara tardia', 3.8, 0, 550),
+(15, 333444, 'LT17BB', 'Brahman', 'Primípara precoce', 2.7, 1, 550);
 
-INSERT INTO vacas (id_fazenda, numero_animal, lote, vaca, categoria, ECC, ciclicidade) VALUES
-(1, 1001, 'Lote A', 'Bela', 'Leiteira', 3.5, 2),
-(2, 2001, 'Lote B', 'Foguete', 'Corte', 3.8, 3),
-(3, 3001, 'Lote C', 'Diamante', 'Leiteira', 4.0, 2),
-(1, 1002, 'Lote D', 'Esperança', 'Corte', 3.7, 2),
-(2, 2002, 'Lote E', 'Aurora', 'Leiteira', 3.9, 3),
-(3, 3002, 'Lote F', 'Cacau', 'Corte', 4.1, 2),
-(1, 1003, 'Lote G', 'Lua', 'Leiteira', 3.6, 2),
-(2, 2003, 'Lote H', 'Estrela', 'Corte', 4.0, 3),
-(3, 3003, 'Lote I', 'Pérola', 'Leiteira', 3.8, 2),
-(1, 1004, 'Lote J', 'Rosa', 'Corte', 4.2, 3),
-(2, 2004, 'Lote K', 'Cristal', 'Leiteira', 3.7, 2),
-(3, 3004, 'Lote L', 'Jade', 'Corte', 3.9, 3),
-(1, 1005, 'Lote M', 'Íris', 'Leiteira', 3.9, 2),
-(2, 2005, 'Lote N', 'Sol', 'Corte', 3.5, 3),
-(3, 3005, 'Lote O', 'Marfim', 'Leiteira', 4.1, 2),
-(1, 1006, 'Lote P', 'Céu', 'Corte', 3.8, 2),
-(2, 2006, 'Lote Q', 'Rubi', 'Leiteira', 4.0, 3),
-(3, 3006, 'Lote R', 'Safira', 'Corte', 3.6, 2),
-(1, 1007, 'Lote S', 'Estrela do Mar', 'Leiteira', 4.2, 2),
-(12, 2007, 'Lote T', 'Amora', 'Corte', 3.7, 3),
-(3, 3007, 'Lote U', 'Polar', 'Leiteira', 3.8, 2);
+INSERT INTO vacas (id_fazenda, numero_animal, lote, vaca, categoria, ECC, ciclicidade, peso) VALUES
+(1, 1001, 'Lote A', 'Bela', 'Leiteira', 3.5, 2, 500),
+(2, 2001, 'Lote B', 'Foguete', 'Corte', 3.8, 3, 600),
+(3, 3001, 'Lote C', 'Diamante', 'Leiteira', 4.0, 2, 550),
+(1, 1002, 'Lote D', 'Esperança', 'Corte', 3.7, 2, 600),
+(2, 2002, 'Lote E', 'Aurora', 'Leiteira', 3.9, 3, 550),
+(3, 3002, 'Lote F', 'Cacau', 'Corte', 4.1, 2, 500),
+(1, 1003, 'Lote G', 'Lua', 'Leiteira', 3.6, 2, 550),
+(2, 2003, 'Lote H', 'Estrela', 'Corte', 4.0, 3, 600),
+(3, 3003, 'Lote I', 'Pérola', 'Leiteira', 3.8, 2, 550),
+(1, 1004, 'Lote J', 'Rosa', 'Corte', 4.2, 3, 600),
+(2, 2004, 'Lote K', 'Cristal', 'Leiteira', 3.7, 2, 550),
+(3, 3004, 'Lote L', 'Jade', 'Corte', 3.9, 3, 500),
+(1, 1005, 'Lote M', 'Íris', 'Leiteira', 3.9, 2, 550),
+(2, 2005, 'Lote N', 'Sol', 'Corte', 3.5, 3, 600),
+(3, 3005, 'Lote O', 'Marfim', 'Leiteira', 4.1, 2, 550),
+(1, 1006, 'Lote P', 'Céu', 'Corte', 3.8, 2, 500),
+(2, 2006, 'Lote Q', 'Rubi', 'Leiteira', 4.0, 3, 600),
+(3, 3006, 'Lote R', 'Safira', 'Corte', 3.6, 2, 550),
+(1, 1007, 'Lote S', 'Estrela do Mar', 'Leiteira', 4.2, 2, 600),
+(12, 2007, 'Lote T', 'Amora', 'Corte', 3.7, 3, 550),
+(3, 3007, 'Lote U', 'Polar', 'Leiteira', 3.8, 2, 550);
 
 INSERT INTO inseminadores (nome_inseminador) VALUES
 ('Rafael'),

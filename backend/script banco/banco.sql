@@ -259,7 +259,7 @@ INSERT INTO resultados_inseminacao (id_vaca, protocolo, touro, id_inseminador, i
 (8, 'Protocolo de Sincronização Completa', 'Daisy', 8, 8, '2024-02-17', 'IATF008', 1, 0, 0),
 (9, 'Protocolo de Sincronização Moderada', 'Bailey', 9, 9, '2024-02-22', 'IATF009', 0, 1, 0),
 (10, 'Protocolo de Sincronização Estendida Completa', 'Sadie', 10, 10, '2024-02-27', 'IATF010', 1, 0, 0),
-(11, 'Protocolo de Sincronização Rápida', 'Maggie', 11, 11, '2024-03-03', 'IATF011', 1, 0, 0),
+(11, 'Protocolo de Sincronização Rápida', 'Maggie', 11, 11, '2024-03-03', 'IATF011', 0, 0, 0),
 (12, 'Protocolo de Sincronização Estendida', 'Max', 12, 12, '2024-03-08', 'IATF012', 0, 1, 0),
 (13, 'Protocolo de Sincronização Completa', 'Bella', 13, 13, '2024-03-13', 'IATF013', 1, 0, 0),
 (14, 'Protocolo de Sincronização Moderada', 'Charlie', 14, 14, '2024-03-18', 'IATF014', 1, 0, 0),
@@ -268,7 +268,8 @@ INSERT INTO resultados_inseminacao (id_vaca, protocolo, touro, id_inseminador, i
 (1, 'Protocolo de Sincronização Estendida', 'Molly', 1, 17, '2024-04-12', 'IATF017', 1, 0, 0),
 (2, 'Protocolo de Sincronização Completa', 'Buddy', 2, 18, '2024-04-22', 'IATF018', 0, 1, 0),
 (3, 'Protocolo de Sincronização Moderada', 'Daisy', 3, 19, '2024-05-02', 'IATF019', 1, 0, 0),
-(4, 'Protocolo de Sincronização Estendida Completa', 'Bailey', 4, 20, '2024-05-12', 'IATF020', 1, 0, 0);
+(4, 'Protocolo de Sincronização Estendida Completa', 'Lucy', 4, 20, '2024-05-12', 'IATF020', 1, 0, 0),
+(9, 'Protocolo de Sincronização Moderada', 'Bailey', 9, 9, '2024-07-01', 'IATF009', 1, 1, 0);
 
 INSERT INTO visitas (id_fazenda, id_venda, id_vendedor,data_visita, houve_venda) VALUES
 (1, 1, 1, '2024-01-10', 1),

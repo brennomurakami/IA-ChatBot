@@ -305,3 +305,17 @@ body {
   text-decoration: underline;
   color: inherit;
 }
+
+#file-span {
+  cursor: pointer;
+  margin-right: 10px;
+  font-size: 1.2em;
+  color: #fff;
+  background-color: #1877F2;
+  padding: 10px;
+  border-radius: 5px;
+  position: absolute; /* Adicionado para posicionamento correto */
+  left: -15px; /* Alinha à esquerda com o padding do textarea */
+  top: 50%;
+  transform: translateY(-50%);
+}

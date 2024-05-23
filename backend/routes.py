@@ -105,7 +105,7 @@ def get_response(chat_id):
         if "SQL121:" in resposta.upper():
             user_message = processar_sql(resposta)
         elif "VECTOR121:" in resposta.upper():
-            user_message = procurar_similaridade(user_message)
+            user_message = procurar_similaridade(resposta)
         else:
             break
     # Salvando a mensagem do usuário e a resposta do servidor no banco de dados

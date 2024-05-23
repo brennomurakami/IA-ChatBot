@@ -55,6 +55,9 @@
             <!-- As mensagens serão adicionadas aqui -->
         </div>
         <div id="message-form">
+            <input type="file" id="file-input" name="file" accept=".pdf" style="display: none;">
+            <span id="file-span" class="fa-solid fa-paperclip"
+            style="background-color:#1877F2;color:#fff;border:none;padding:10px 20px;border-radius:5px;font-size:1em;cursor:pointer;"></span>
             <div class="message-wrapper">
                 <textarea id="message" rows="1" placeholder="Enviar Mensagem" maxlength="4000"></textarea>
                 <button class="send-button"
@@ -64,10 +67,7 @@
                 </button>
             </div>
         </div>
-        <div class="send-button">
-        <input type="file" id="file-input" name="file" accept=".pdf, .doc, .docx, .csv, .txt" style="display: none;">
-            <span id="file-span" style="background-color:#1877F2;color:#fff;border:none;padding:10px 20px;border-radius:5px;font-size:1em;cursor:pointer;">Enviar Arquivo</span>
-        </div>
+
     </main>
     <script src="static/scripts/script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>

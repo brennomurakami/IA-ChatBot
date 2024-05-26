@@ -5,69 +5,75 @@ from langchain_openai import OpenAIEmbeddings
 import os
 from dotenv import load_dotenv
 
+# Carrega variáveis de ambiente do arquivo .env
 load_dotenv()
 
+# Inicializa os embeddings da OpenAI
 embeddings = OpenAIEmbeddings()
 
+# Função para limpar o texto removendo espaços em branco extras
 def limpar_texto(texto):
     return " ".join(texto.split())
-def process_pdf(files):
-    print(files)
-    reader = PdfReader(files)
-    raw_text = ''
-    for i, page in enumerate(reader.pages):
-        text = page.extract_text()
-        if text:
-            raw_text += text
+
+# Função para processar o arquivo PDF e extrair o texto
+def processar_pdf(arquivo):
+    leitor = PdfReader(arquivo)
+    texto_bruto = ''
+    for pagina in leitor.pages:
+        texto = pagina.extract_text()
+        if texto:
+            texto_bruto += texto
     
-    text_splitter = CharacterTextSplitter(
+    divisor_texto = CharacterTextSplitter(
         separator='\n',
-        chunk_size=1000,
-        chunk_overlap=300,
+        chunk_size=300,
+        chunk_overlap=100,
         length_function=len
     )
 
-    texts = text_splitter.split_text(raw_text)
-    return texts
+    textos_divididos = divisor_texto.split_text(texto_bruto)
+    return textos_divididos
 
-def criar_indices_faiss(files):
-    texts = process_pdf(files)
+# Função para criar os índices FAISS a partir dos textos extraídos do PDF
+def criar_indices_faiss(arquivo):
+    textos = processar_pdf(arquivo)
     # Cria o índice FAISS a partir dos textos e dos embeddings
-    vector_store = FAISS.from_texts(texts, embeddings)
+    vetor_store = FAISS.from_texts(textos, embeddings)
     # Salva o índice em um arquivo
-    vector_store.save_local("faiss_index")
-    return vector_store
+    vetor_store.save_local("faiss_index")
+    return vetor_store
 
+# Função para carregar os índices FAISS de um arquivo local
 def carregar_indices_faiss():
-    # Carrega o índice FAISS a partir do arquivo com desserialização perigosa permitida
-    vector_store = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
-    return vector_store
+    vetor_store = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+    return vetor_store
 
-def adicionar_texto_ao_indice(vector_store, files):
-    texts = process_pdf(files)
-    # Adiciona novos textos ao índice existente
-    metadatas = [{} for _ in texts] 
-    vector_store.add_texts(texts, metadatas=metadatas)
+# Função para adicionar novos textos ao índice existente
+def adicionar_texto_ao_indice(vetor_store, arquivo):
+    textos = processar_pdf(arquivo)
+    metadados = [{} for _ in textos] 
+    vetor_store.add_texts(textos, metadatas=metadados)
     # Salva o índice atualizado em um arquivo
-    vector_store.save_local("faiss_index")
+    vetor_store.save_local("faiss_index")
 
-def verificar_e_atualizar_indice(files):
-    if os.path.exists("faiss_index"):
-        vector_store = carregar_indices_faiss()
-        adicionar_texto_ao_indice(vector_store, files)
+# Função para verificar se o índice existe e atualizar ou criar conforme necessário
+def verificar_e_atualizar_indice(arquivo):
+    caminho_indice = os.path.join("faiss_index", "index.faiss")
+    if os.path.exists("caminho_indice"):
+        vetor_store = carregar_indices_faiss()
+        adicionar_texto_ao_indice(vetor_store, arquivo)
     else:
-        vector_store = criar_indices_faiss(files)
-    return vector_store
+        vetor_store = criar_indices_faiss(arquivo)
+    return vetor_store
 
-def procurar_similaridade(query):
-    query.split('VECTOR121:')
-    query_embedding = embeddings.embed_query(query)
-    # Verificar e atualizar o índice
-    vector_store = carregar_indices_faiss()
+# Função para procurar similaridade no índice FAISS
+def procurar_similaridade(consulta):
+    consulta = consulta.split('VECTOR121:')
+    consulta_embedding = embeddings.embed_query(consulta)
+    consulta_embedding = "".join(str(consulta_embedding))
+    vetor_store = carregar_indices_faiss()
     # Realiza a busca de similaridade
-    query_embedding_str = "".join(str(query_embedding))
-    resultados = vector_store.similarity_search(query=query_embedding_str, k=2)
+    resultados = vetor_store.similarity_search(query=consulta_embedding, k=10)
     textos_resultados = [limpar_texto(doc.page_content) for doc in resultados]
     textos_resultados = ' '.join(textos_resultados)
-    print("RESULTADOS: ", textos_resultados)
     return textos_resultados

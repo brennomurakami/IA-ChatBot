@@ -26,8 +26,8 @@ def processar_pdf(arquivo):
     
     divisor_texto = CharacterTextSplitter(
         separator='\n',
-        chunk_size=300,
-        chunk_overlap=100,
+        chunk_size=1000,
+        chunk_overlap=300,
         length_function=len
     )
 
@@ -59,7 +59,7 @@ def adicionar_texto_ao_indice(vetor_store, arquivo):
 # Função para verificar se o índice existe e atualizar ou criar conforme necessário
 def verificar_e_atualizar_indice(arquivo):
     caminho_indice = os.path.join("faiss_index", "index.faiss")
-    if os.path.exists("caminho_indice"):
+    if os.path.exists(caminho_indice):
         vetor_store = carregar_indices_faiss()
         adicionar_texto_ao_indice(vetor_store, arquivo)
     else:
@@ -68,12 +68,10 @@ def verificar_e_atualizar_indice(arquivo):
 
 # Função para procurar similaridade no índice FAISS
 def procurar_similaridade(consulta):
-    consulta = consulta.split('VECTOR121:')
-    consulta_embedding = embeddings.embed_query(consulta)
-    consulta_embedding = "".join(str(consulta_embedding))
+    consulta = consulta.replace("VECTOR121:", "").strip()
     vetor_store = carregar_indices_faiss()
     # Realiza a busca de similaridade
-    resultados = vetor_store.similarity_search(query=consulta_embedding, k=10)
+    resultados = vetor_store.similarity_search(query=consulta, k=2)
     textos_resultados = [limpar_texto(doc.page_content) for doc in resultados]
     textos_resultados = ' '.join(textos_resultados)
     return textos_resultados

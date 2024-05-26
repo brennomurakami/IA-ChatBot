@@ -7,10 +7,10 @@ class Usuario(UserMixin):
         self.nome_usuario = nome_usuario
 
     @staticmethod
-    def obter(usuario_id):
+    def get(usuario_id):
         # Conecta-se ao banco de dados usando a instância do Flask-MySQLDB
         cursor = mysql.connection.cursor()
-        cursor.execute("SELECT * FROM usuarios WHERE id = %s", (usuario_id,))
+        cursor.execute("SELECT * FROM users WHERE id = %s", (usuario_id,))
         dados_usuario = cursor.fetchone()
         cursor.close()
 
@@ -23,7 +23,7 @@ class Usuario(UserMixin):
     def obter_chats_usuario():
         usuario_id = current_user.id
         cursor = mysql.connection.cursor()
-        cursor.execute("SELECT * FROM chats WHERE usuario_id = %s", (usuario_id,))
+        cursor.execute("SELECT * FROM chats WHERE user_id = %s", (usuario_id,))
         chats = cursor.fetchall()
         cursor.close()
         return chats

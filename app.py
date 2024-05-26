@@ -2,7 +2,7 @@ from flask import Flask
 from flask_login import LoginManager
 from backend.routes import login_routes, index_routes, cadastrar_routes
 from backend.db import configure_db
-from backend.user import User
+from backend.user import Usuario
 import os
 
 app = Flask(__name__)
@@ -15,7 +15,7 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get(int(user_id)) 
+    return Usuario.get(int(user_id)) 
 
 # Configuração do MySQL
 configure_db(app)

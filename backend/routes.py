@@ -21,7 +21,7 @@ def login():
 
     # Consulta ao banco de dados para verificar se o usuário e a senha estão corretos
     cursor = mysql.connection.cursor()
-    cursor.execute("SELECT * FROM usuarios WHERE nome_usuario = %s AND senha = %s", (nome_usuario, senha))
+    cursor.execute("SELECT * FROM users WHERE username = %s AND password = %s", (nome_usuario, senha))
     dados_usuario = cursor.fetchone()
     cursor.close()
 
@@ -33,6 +33,7 @@ def login():
         return jsonify({'mensagem': 'Nome de usuário ou senha incorretos!'}), 401
     
 # Rota para cadastrar um usuário
+@cadastrar_routes.route('/cadastrar', methods=['POST'])
 def cadastrar():
     dados = request.get_json()
     nome_usuario = dados.get('username')
@@ -40,7 +41,7 @@ def cadastrar():
 
     # Consulta ao banco de dados para verificar se o usuário já existe
     cursor = mysql.connection.cursor()
-    cursor.execute("SELECT * FROM usuarios WHERE nome_usuario = %s", (nome_usuario,))
+    cursor.execute("SELECT * FROM users WHERE username = %s", (nome_usuario,))
     dados_usuario = cursor.fetchone()
 
     if dados_usuario:
@@ -48,7 +49,7 @@ def cadastrar():
         return jsonify({'erro': 'Nome de usuário já existe!'}), 400
 
     # Insere o novo usuário no banco de dados
-    cursor.execute("INSERT INTO usuarios (nome_usuario, senha) VALUES (%s, %s)", (nome_usuario, senha))
+    cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (nome_usuario, senha))
     mysql.connection.commit()
     cursor.close()
 
@@ -76,9 +77,10 @@ def logout():
 @index_routes.route('/home')
 @login_required
 def home():
-    nome_usuario = current_user.nome_usuario  # Aqui, current_user é uma variável fornecida pelo Flask-Login
+    nome_usuario = current_user.nome_usuario   # Aqui, current_user é uma variável fornecida pelo Flask-Login
+    print("nome:",nome_usuario)
     chats_usuario = Usuario.obter_chats_usuario()
-    return render_template('index.html', nome_usuario=nome_usuario, chats_usuario=chats_usuario)
+    return render_template('index.html', username=nome_usuario, user_chats=chats_usuario)
 
 # Criando rota para mandar a mensagem e receber a resposta
 @index_routes.route('/get_response/<int:chat_id>', methods=['POST'])
@@ -87,7 +89,7 @@ def get_response(chat_id):
     global thread
     data = request.get_json()
     mensagem_usuario = data.get('message')
-
+    mensagem_inicial_usuario = mensagem_usuario
     while True:
         # Envia a mensagem do usuário para o servidor de chat
         client.beta.threads.messages.create(
@@ -104,18 +106,18 @@ def get_response(chat_id):
 
         messages = client.beta.threads.messages.list(thread_id=thread)
         resposta_servidor = messages.data[0].content[0].text.value
-
         # Verifica se a resposta do servidor contém comandos especiais
         if "SQL121:" in resposta_servidor.upper():
             mensagem_usuario = processar_sql(resposta_servidor)
         elif "VECTOR121:" in resposta_servidor.upper():
+            print("entrou!")
             mensagem_usuario = procurar_similaridade(resposta_servidor)
         else:
             break
 
     # Salva a mensagem do usuário e a resposta do servidor no banco de dados
     cursor = mysql.connection.cursor()
-    cursor.execute("INSERT INTO messages (text_usuario, text_servidor, chat_id) VALUES (%s, %s, %s)", (mensagem_usuario, resposta_servidor, chat_id))
+    cursor.execute("INSERT INTO messages (text_usuario, text_servidor, chat_id) VALUES (%s, %s, %s)", (mensagem_inicial_usuario, resposta_servidor, chat_id))
     mysql.connection.commit()
     cursor.close()
 
@@ -144,6 +146,7 @@ def add_chat():
 @index_routes.route('/get_messages/<int:chat_id>')
 @login_required
 def get_messages(chat_id):
+    global thread
     # Consulta o banco de dados para obter as mensagens correspondentes ao chat_id
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM messages WHERE chat_id = %s", (chat_id,))

@@ -2,10 +2,10 @@ from backend.db import mysql
 
 # Extrai o código SQL da mensagem
 def extrair_sql(mensagem):
-    partes_sql = mensagem.split("CODIGO SQL121:")
+    partes_sql = mensagem.split("SQL121:")
     codigo_sql = " ".join(partes_sql)
     codigo_sql = codigo_sql.replace("```", "").strip()
-    codigo_sql = codigo_sql.replace("CODIGO SQL121:", "").strip()
+    codigo_sql = codigo_sql.replace("SQL121:", "").strip()
     return mensagem
 
 # Função para processar e executar um comando SQL a partir de uma mensagem

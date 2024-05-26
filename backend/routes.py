@@ -3,7 +3,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 from backend.file import *
 from backend.db import mysql
 from backend.gpt import client
-from backend.user import User
+from backend.user import Usuario
 from backend.funcoes import *
 import os
 
@@ -15,46 +15,44 @@ thread = ''
 # Rota para fazer login
 @login_routes.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
+    dados = request.get_json()
+    nome_usuario = dados.get('username')
+    senha = dados.get('password')
 
     # Consulta ao banco de dados para verificar se o usuário e a senha estão corretos
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM users WHERE username = %s AND password = %s", (username, password))
-    user_data = cur.fetchone()
-    cur.close()
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT * FROM usuarios WHERE nome_usuario = %s AND senha = %s", (nome_usuario, senha))
+    dados_usuario = cursor.fetchone()
+    cursor.close()
 
-    if user_data:
-        user = User(user_id=user_data[0], username=user_data[1])
-        login_user(user)
-        return jsonify({'message': 'Login realizado com sucesso!'})
+    if dados_usuario:
+        usuario = Usuario(usuario_id=dados_usuario[0], nome_usuario=dados_usuario[1])
+        login_user(usuario)
+        return jsonify({'mensagem': 'Login realizado com sucesso!'})
     else:
-        return jsonify({'error': 'Nome de usuário ou senha incorretos!'}), 401
+        return jsonify({'mensagem': 'Nome de usuário ou senha incorretos!'}), 401
     
 # Rota para cadastrar um usuário
-@cadastrar_routes.route('/cadastrar', methods=['POST'])
 def cadastrar():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
+    dados = request.get_json()
+    nome_usuario = dados.get('username')
+    senha = dados.get('password')
 
     # Consulta ao banco de dados para verificar se o usuário já existe
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM users WHERE username = %s", (username,))
-    user_data = cur.fetchone()
-    cur.close()
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT * FROM usuarios WHERE nome_usuario = %s", (nome_usuario,))
+    dados_usuario = cursor.fetchone()
 
-    if user_data:
-        return jsonify({'error': 'Nome de usuário já existe!'}), 400
+    if dados_usuario:
+        cursor.close()
+        return jsonify({'erro': 'Nome de usuário já existe!'}), 400
 
     # Insere o novo usuário no banco de dados
-    cur = mysql.connection.cursor()
-    cur.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
+    cursor.execute("INSERT INTO usuarios (nome_usuario, senha) VALUES (%s, %s)", (nome_usuario, senha))
     mysql.connection.commit()
-    cur.close()
+    cursor.close()
 
-    return jsonify({'message': 'Usuário cadastrado com sucesso!'})
+    return jsonify({'mensagem': 'Usuário cadastrado com sucesso!'})
 
 
 # Rota do cadastro
@@ -78,9 +76,9 @@ def logout():
 @index_routes.route('/home')
 @login_required
 def home():
-    username = current_user.username  # Aqui, current_user é uma variável fornecida pelo Flask-Login
-    user_chats = User.get_user_chats()
-    return render_template('index.html', username=username, user_chats=user_chats)
+    nome_usuario = current_user.nome_usuario  # Aqui, current_user é uma variável fornecida pelo Flask-Login
+    chats_usuario = Usuario.obter_chats_usuario()
+    return render_template('index.html', nome_usuario=nome_usuario, chats_usuario=chats_usuario)
 
 # Criando rota para mandar a mensagem e receber a resposta
 @index_routes.route('/get_response/<int:chat_id>', methods=['POST'])
@@ -88,75 +86,80 @@ def home():
 def get_response(chat_id):
     global thread
     data = request.get_json()
-    user_message = data.get('message')
-    mensagem_usuario = user_message
+    mensagem_usuario = data.get('message')
+
     while True:
-        message = client.beta.threads.messages.create(
-        thread_id=thread,
-        role="user",
-        content=user_message
+        # Envia a mensagem do usuário para o servidor de chat
+        client.beta.threads.messages.create(
+            thread_id=thread,
+            role="user",
+            content=mensagem_usuario
         )
+
+        # Obtém a resposta do servidor de chat
         run = client.beta.threads.runs.create_and_poll(
-        thread_id=thread,
-        assistant_id="asst_8dZmPoQiKTMkaxUjMuS6uUuc"
+            thread_id=thread,
+            assistant_id="asst_8dZmPoQiKTMkaxUjMuS6uUuc"
         )
+
         messages = client.beta.threads.messages.list(thread_id=thread)
-        resposta =  messages.data[0].content[0].text.value
-        if "SQL121:" in resposta.upper():
-            user_message = processar_sql(resposta)
-        elif "VECTOR121:" in resposta.upper():
-            user_message = procurar_similaridade(resposta)
+        resposta_servidor = messages.data[0].content[0].text.value
+
+        # Verifica se a resposta do servidor contém comandos especiais
+        if "SQL121:" in resposta_servidor.upper():
+            mensagem_usuario = processar_sql(resposta_servidor)
+        elif "VECTOR121:" in resposta_servidor.upper():
+            mensagem_usuario = procurar_similaridade(resposta_servidor)
         else:
             break
-    # Salvando a mensagem do usuário e a resposta do servidor no banco de dados
-    cur = mysql.connection.cursor()
-    cur.execute("INSERT INTO messages (text_usuario, text_servidor, chat_id) VALUES (%s, %s, %s)", (mensagem_usuario, messages.data[0].content[0].text.value, chat_id))
+
+    # Salva a mensagem do usuário e a resposta do servidor no banco de dados
+    cursor = mysql.connection.cursor()
+    cursor.execute("INSERT INTO messages (text_usuario, text_servidor, chat_id) VALUES (%s, %s, %s)", (mensagem_usuario, resposta_servidor, chat_id))
     mysql.connection.commit()
-    cur.close()
-    print("\n\n",messages.data[0].content[0].text.value)
+    cursor.close()
+
     # Retorna a resposta ao usuário
-    return jsonify({'message': messages.data[0].content[0].text.value})
+    return jsonify({'message': resposta_servidor})
 
 @index_routes.route('/add_chat', methods=['POST'])
+@login_required
 def add_chat():
     data = request.get_json()
-    title = data.get('title')
+    titulo = data.get('title')
     user_id = current_user.id
     global thread
-    thread = client.beta.threads.create()
-    thread = thread.id
+    thread = client.beta.threads.create().id
+    
     # Insere um novo chat no banco de dados
     cur = mysql.connection.cursor()
-    cur.execute("INSERT INTO chats (title, user_id, id_gpt) VALUES (%s, %s, %s)", (title, user_id, thread))
+    cur.execute("INSERT INTO chats (title, user_id, id_gpt) VALUES (%s, %s, %s)", (titulo, user_id, thread))
     mysql.connection.commit()
-    
-    # Recupera o ID do chat recém-adicionado
     chat_id = cur.lastrowid
-    
     cur.close()
 
     # Retorna os dados do chat recém-adicionado
-    return jsonify({'chat_id': chat_id, 'title': title})
+    return jsonify({'chat_id': chat_id, 'title': titulo})
 
 @index_routes.route('/get_messages/<int:chat_id>')
 @login_required
 def get_messages(chat_id):
-    # Consulte o banco de dados para obter as mensagens correspondentes ao chat_id
+    # Consulta o banco de dados para obter as mensagens correspondentes ao chat_id
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM messages WHERE chat_id = %s", (chat_id,))
     messages = cur.fetchall()
     cur.close()
-    # Formate as mensagens como uma lista de dicionários para facilitar a serialização em JSON
+    
+    # Formata as mensagens como uma lista de dicionários
     formatted_messages = [{"id": message[0], "usuario": message[1], "servidor": message[2]} for message in messages]
-    global thread
-    # Consulte o banco de dados para obter as mensagens correspondentes ao chat_id
+    
+    # Obtém o ID GPT do chat
     cur = mysql.connection.cursor()
     cur.execute("SELECT id_gpt FROM chats WHERE id = %s", (chat_id,))
-    messages = cur.fetchone()
+    thread = cur.fetchone()[0]
     cur.close()
-    thread = messages[0]
-    thread = thread.strip("'")
-    # Retorne as mensagens como resposta JSON
+
+    # Retorna as mensagens como resposta JSON
     return jsonify(formatted_messages)
 
 @index_routes.route('/delete_chat/<int:chat_id>', methods=['POST'])
@@ -166,12 +169,10 @@ def delete_chat(chat_id):
         # Deleta todas as mensagens associadas ao chat_id
         cur = mysql.connection.cursor()
         cur.execute("DELETE FROM messages WHERE chat_id = %s", (chat_id,))
-        mysql.connection.commit()
-
+        
         # Deleta o chat_id
         cur.execute("DELETE FROM chats WHERE id = %s", (chat_id,))
         mysql.connection.commit()
-
         cur.close()
 
         return jsonify({"message": "Chat deletado com sucesso."}), 200
@@ -183,10 +184,10 @@ def delete_chat(chat_id):
 def update_chat_title(chat_id):
     try:
         data = request.get_json()
-        new_title = data.get('title')
+        novo_titulo = data.get('title')
 
         cur = mysql.connection.cursor()
-        cur.execute("UPDATE chats SET title = %s WHERE id = %s", (new_title, chat_id))
+        cur.execute("UPDATE chats SET title = %s WHERE id = %s", (novo_titulo, chat_id))
         mysql.connection.commit()
         cur.close()
 
@@ -197,7 +198,6 @@ def update_chat_title(chat_id):
 @index_routes.route('/upload-arquivo', methods=['POST'])
 @login_required
 def upload_arquivo():
-    
     if 'file' not in request.files:
         return 'Nenhum arquivo enviado.', 400
 
@@ -208,7 +208,7 @@ def upload_arquivo():
         return 'Nenhum arquivo selecionado.', 400
 
     if arquivo:
-        # Salvar o arquivo na pasta uploads
+        # Salva o arquivo na pasta uploads
         upload_folder = os.path.join("backend", 'uploads')
         if not os.path.exists(upload_folder):
             os.makedirs(upload_folder)
@@ -216,7 +216,7 @@ def upload_arquivo():
         file_path = os.path.join(upload_folder, arquivo.filename)
         arquivo.save(file_path)
         
-        # Criar e salvar o vectorstore
+        # Cria e salva o vectorstore
         verificar_e_atualizar_indice(file_path)
 
         return 'Arquivo enviado e vetorizado com sucesso.', 200

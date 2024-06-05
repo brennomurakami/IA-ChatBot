@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, render_template
 from flask_login import login_user, login_required, logout_user, current_user
 from backend.file import *
 from backend.db import mysql
-from backend.llm import client_vector, chain
+from backend.llm import chain
 from backend.user import Usuario
 from backend.funcoes import *
 from io import BytesIO
@@ -228,9 +228,9 @@ def upload_arquivo():
         extensao = arquivo.filename.rsplit(".", 1)[-1].lower()
         global texto
         file_stream = BytesIO(arquivo.read())
-        texto = process_document(file_stream, extensao)
-        texto = texto[0].page_content
+        texto = process_document_return(file_stream, extensao)
         verificar_e_atualizar_indice(file_stream, extensao)
+        texto = texto[0].page_content
         print("Arquivo salvo no banco vetorizado")
 
         return "Arquivo enviado com sucesso.", 200

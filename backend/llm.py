@@ -45,7 +45,8 @@ set_llm_cache(InMemoryCache())
 
 chain = prompt | llm
 
-
+""""
+AINDA A IMPLEMENTAR
 new_vectorstore = FAISS.load_local(
     "faiss_index", embeddings, allow_dangerous_deserialization=True
 )
@@ -53,3 +54,4 @@ new_vectorstore = FAISS.load_local(
 client_vector = RetrievalQA.from_chain_type(
     llm=llm, chain_type="stuff", retriever=new_vectorstore.as_retriever()
 )
+"""

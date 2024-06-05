@@ -18,6 +18,37 @@ def limpar_texto(texto):
 
 
 def process_document(files, file_extension):
+    if file_extension == "pdf":
+        print("PROCESSANDO PDF")
+        reader = PdfReader(files)
+        for page in reader.pages:
+            text = page.extract_text()
+            if text:
+                raw_text += text
+    elif file_extension == "txt":
+        print("PROCESSANDO TXT")
+        if isinstance(files, BytesIO):
+            files.seek(0)
+            raw_text = files.read().decode("utf-8")
+        else:
+            with open(files, "r") as file:
+                raw_text = file.read()
+    elif file_extension == "docx":
+        print("PROCESSANDO DOCX")
+        doc = docx.Document(files)
+        raw_text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+    elif file_extension == "string":
+        return files
+    else:
+        raise ValueError("Unsupported file type")
+
+    text_splitter = TokenTextSplitter(chunk_size=350, chunk_overlap=100)
+    documents = text_splitter.split_text(raw_text)
+    document_objs = [Document(page_content=doc) for doc in documents]
+    print(document_objs)
+    return document_objs
+
+def process_document_return(files, file_extension):
     raw_text = " documento121: "
     if file_extension == "pdf":
         print("PROCESSANDO PDF")
@@ -38,6 +69,8 @@ def process_document(files, file_extension):
         print("PROCESSANDO DOCX")
         doc = docx.Document(files)
         raw_text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+    elif file_extension == "string":
+        return files
     else:
         raise ValueError("Unsupported file type")
 

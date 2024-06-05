@@ -226,12 +226,37 @@ def upload_arquivo():
 
         # print(arquivo_texto)
         extensao = arquivo.filename.rsplit(".", 1)[-1].lower()
+        file_stream = BytesIO(arquivo.read())
+        verificar_e_atualizar_indice(file_stream, extensao)
+        print("Arquivo salvo no banco vetorizado")
+
+        return "Arquivo enviado com sucesso.", 200
+    else:
+        return "Tipo de arquivo não permitido.", 400
+    
+    
+@index_routes.route("/chat-arquivo", methods=["POST"])
+@login_required
+def chat_arquivo():
+    if "file" not in request.files:
+        return "Nenhum arquivo enviado.", 400
+
+    arquivo = request.files["file"]
+
+    if arquivo.filename == "":
+        return "Nenhum arquivo selecionado.", 400
+
+    # Verifica se o arquivo é permitido
+    if arquivo:
+        print("Arquivo salvo com sucesso")
+
+        # print(arquivo_texto)
+        extensao = arquivo.filename.rsplit(".", 1)[-1].lower()
         global texto
         file_stream = BytesIO(arquivo.read())
         texto = process_document_return(file_stream, extensao)
-        verificar_e_atualizar_indice(file_stream, extensao)
         texto = texto[0].page_content
-        print("Arquivo salvo no banco vetorizado")
+        print("Arquivo enviado ao chat")
 
         return "Arquivo enviado com sucesso.", 200
     else:

@@ -233,6 +233,29 @@ document.addEventListener("DOMContentLoaded", function () {
   var chatList = document.getElementById("chat-list");
   var icon = document.getElementById("sidebar-toggle-icon");
   var chatCards = document.querySelectorAll(".chat-card");
+  const fileSpan = document.getElementById('file-span');
+  const menu = document.getElementById('menu');
+
+  fileSpan.addEventListener('click', function(event) {
+    const rect = fileSpan.getBoundingClientRect();
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    menu.style.right = rect.right + 'px';
+    menu.style.bottom = (window.innerHeight - rect.top) + 'px';
+  });
+
+  document.addEventListener('click', function(event) {
+    if (event.target !== fileSpan && !menu.contains(event.target)) {
+        menu.style.display = 'none';
+    }
+  });
+
+  document.getElementById('option1').addEventListener('click', function() {
+      document.getElementById('file-input').click();
+  });
+
+  document.getElementById('option2').addEventListener('click', function() {
+      document.getElementById('chat-input').click();
+  });
 
   // Evento para adicionar um novo chat
   document.getElementById("add-chat-button").addEventListener("click", async function () {
@@ -366,10 +389,6 @@ async function updateChatTitle(newTitle, chatId) {
   }
 }
 
-document.getElementById('file-span').addEventListener('click', function () {
-  // Clica no elemento 'file-input' para abrir a caixa de diálogo de seleção de arquivo
-  document.getElementById('file-input').click();
-});
 document.getElementById('file-input').addEventListener('change', function (event) {
   const file = event.target.files[0];  // Obtém o arquivo selecionado
 
@@ -379,6 +398,33 @@ document.getElementById('file-input').addEventListener('change', function (event
 
   // Envie o arquivo para o servidor Flask usando Fetch
   fetch('/upload-arquivo', {
+    method: 'POST',
+    body: formData
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Erro ao enviar o arquivo.');
+      }
+      return response.text();
+    })
+    .then(data => {
+      console.log(data); // Log da resposta do servidor
+      // Faça qualquer outra coisa que você queira fazer após enviar o arquivo
+    })
+    .catch(error => {
+      console.error('Erro:', error);
+    });
+});
+
+document.getElementById('chat-input').addEventListener('change', function (event) {
+  const file = event.target.files[0];  // Obtém o arquivo selecionado
+
+  // Crie um objeto FormData para enviar o arquivo
+  const formData = new FormData();
+  formData.append('file', file);
+
+  // Envie o arquivo para o servidor Flask usando Fetch
+  fetch('/chat-arquivo', {
     method: 'POST',
     body: formData
   })

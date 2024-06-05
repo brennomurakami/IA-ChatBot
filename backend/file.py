@@ -18,6 +18,7 @@ def limpar_texto(texto):
 
 
 def process_document(files, file_extension):
+    raw_text = " documento121: "
     if file_extension == "pdf":
         print("PROCESSANDO PDF")
         reader = PdfReader(files)

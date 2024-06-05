@@ -46,6 +46,7 @@ async function sendUserMessage() {
   waitingMessageParagraph.textContent = "Aguardando resposta do servidor, por favor aguarde...";
   waitingMessageParagraph.classList.add("message", "server-message");
   messageContainer.appendChild(waitingMessageParagraph);
+  messageContainer.scrollTop = messageContainer.scrollHeight;
 
   // Envia a mensagem do usuário para o servidor usando fetch
   const response = await fetch(`/get_response/${chatId}`, {
@@ -71,6 +72,27 @@ async function sendUserMessage() {
   serverResponseParagraph.innerHTML = serverResponse.message;
   serverResponseParagraph.classList.add("message", "server-message");
   messageContainer.appendChild(serverResponseParagraph);
+
+  // Cria o botão de download
+  const clickableSpan = document.createElement('span')
+  clickableSpan.className = 'fa-solid fa-file-arrow-down';
+  clickableSpan.style.color = 'white';
+  clickableSpan.style.cursor = 'pointer';
+  clickableSpan.style.fontSize = 'medium'; // Define o tamanho da fonte como menor
+  clickableSpan.style.float = 'right'; // Alinha o span à direita
+  
+  clickableSpan.addEventListener('click', function () {
+    var opt = {
+      margin: 1,
+      filename: "download.pdf",
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+    };
+
+    html2pdf().set(opt).from(serverResponse.message).save();
+  });
+  // Adiciona o botão de download ao container de mensagens
+  messageContainer.appendChild(clickableSpan);
 
   messageContainer.scrollTop = messageContainer.scrollHeight;
 }
@@ -132,7 +154,7 @@ function createChatCard(chatData, id) {
   // Adiciona o card à lista de chats
   const messageContainer = document.getElementById("message-container");
   messageContainer.innerHTML = ""; // Limpa o container de mensagens
-  
+
   chatList.appendChild(chatCard);
   chatCards = document.querySelectorAll(".chat-card");
   chatCards.forEach(function (chatCard) {
@@ -180,7 +202,7 @@ function createChatCard(chatData, id) {
       },
       body: JSON.stringify(),
     });
-    if(chatCard.classList.contains("active")){
+    if (chatCard.classList.contains("active")) {
       const messageContainer = document.getElementById("message-container");
       messageContainer.innerHTML = ""; // Limpe o container de mensagens
     }
@@ -240,7 +262,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const response = await fetch("/logout", {
         method: "GET",
       });
-  
+
       if (response.ok) {
         // Redireciona o usuário para a página de login ou outra página de sua escolha
         window.location.href = "/";  // Redireciona para a página de login
@@ -344,11 +366,11 @@ async function updateChatTitle(newTitle, chatId) {
   }
 }
 
-document.getElementById('file-span').addEventListener('click', function() {
+document.getElementById('file-span').addEventListener('click', function () {
   // Clica no elemento 'file-input' para abrir a caixa de diálogo de seleção de arquivo
   document.getElementById('file-input').click();
 });
-document.getElementById('file-input').addEventListener('change', function(event) {
+document.getElementById('file-input').addEventListener('change', function (event) {
   const file = event.target.files[0];  // Obtém o arquivo selecionado
 
   // Crie um objeto FormData para enviar o arquivo
@@ -357,20 +379,20 @@ document.getElementById('file-input').addEventListener('change', function(event)
 
   // Envie o arquivo para o servidor Flask usando Fetch
   fetch('/upload-arquivo', {
-      method: 'POST',
-      body: formData
+    method: 'POST',
+    body: formData
   })
-  .then(response => {
+    .then(response => {
       if (!response.ok) {
-          throw new Error('Erro ao enviar o arquivo.');
+        throw new Error('Erro ao enviar o arquivo.');
       }
       return response.text();
-  })
-  .then(data => {
+    })
+    .then(data => {
       console.log(data); // Log da resposta do servidor
       // Faça qualquer outra coisa que você queira fazer após enviar o arquivo
-  })
-  .catch(error => {
+    })
+    .catch(error => {
       console.error('Erro:', error);
-  });
+    });
 });

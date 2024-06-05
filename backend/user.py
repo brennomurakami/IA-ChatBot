@@ -1,6 +1,7 @@
 from flask_login import UserMixin, current_user
 from backend.db import mysql
 
+
 class Usuario(UserMixin):
     def __init__(self, usuario_id, nome_usuario):
         self.id = usuario_id
